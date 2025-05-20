@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>銷售統計圖表</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    h2 {
+      color: #2c3e50;
+    }
+    #chart-container {
+      width: 90%;
+      max-width: 800px;
+      margin: auto;
+    }
+    #exportBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #exportBtn:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h2>📈 每月銷售趨勢圖</h2>
+  <div id="chart-container">
+    <canvas id="lineChart"></canvas>
+  </div>
+
+  <button id="exportBtn">匯出為 Excel</button>
+
+  <script>
+    // 模擬從 Python 產生的 JSON 載入資料（也可 AJAX 取資料）
+    const salesData = [
+      { 月份: '2024-01', 銷售總額: 320 },
+      { 月份: '2024-02', 銷售總額: 420 },
+      { 月份: '2024-03', 銷售總額: 680 }
+    ];
+
+    // 準備資料
+    const labels = salesData.map(item => item.月份);
+    const values = salesData.map(item => item.銷售總額);
+
+    // 建立折線圖
+    const ctx = document.getElementById('lineChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '每月銷售總額',
+          data: values,
+          borderColor: '#27ae60',
+          backgroundColor: 'rgba(39, 174, 96, 0.2)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 5,
+          pointBackgroundColor: '#27ae60'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // 匯出成 Excel 檔案
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(salesData);
+      XLSX.utils.book_append_sheet(wb, ws, "銷售統計");
+      XLSX.writeFile(wb, "sales_summary.xlsx");
+    });
+  </script>
+</body>
+</html>

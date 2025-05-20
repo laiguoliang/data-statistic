@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>銷售分類報表</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container my-5">
+    <h2 class="text-center mb-4">📊 銷售分類互動報表</h2>
+    <div class="row">
+      <div class="col-md-6">
+        <canvas id="barChart"></canvas>
+      </div>
+      <div class="col-md-6">
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    fetch("/api/sales_summary")
+      .then(res => res.json())
+      .then(data => {
+        const labels = data.map(d => d.分類);
+        const values = data.map(d => d.金額);
+        const colors = ["#3498db", "#2ecc71", "#f39c12", "#e74c3c", "#8e44ad"];
+
+        new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [{
+              label: "各分類金額",
+              data: values,
+              backgroundColor: colors
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: { display: true, text: "分類金額長條圖" }
+            }
+          }
+        });
+
+        new Chart(document.getElementById("pieChart"), {
+          type: "pie",
+          data: {
+            labels,
+            datasets: [{
+              label: "分類佔比",
+              data: values,
+              backgroundColor: colors
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: { display: true, text: "分類佔比圓餅圖" }
+            }
+          }
+        });
+      });
+  </script>
+</body>
+</html>

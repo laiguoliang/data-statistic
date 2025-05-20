@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>每月銷售圖表</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: Arial; background: #f7f7f7; padding: 20px; }
+    #chart-container { width: 90%; max-width: 800px; margin: auto; }
+    button {
+      padding: 10px 20px;
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <h2>📊 每月銷售統計</h2>
+  <div id="chart-container">
+    <canvas id="salesChart"></canvas>
+  </div>
+
+  <button onclick="exportExcel()">匯出 Excel</button>
+  <button onclick="location.href='/report'">進入分類報表 ➡️</button>
+
+  <script>
+    let chartData = [];
+
+    async function loadChart() {
+      const res = await fetch("/api/sales");
+      chartData = await res.json();
+      const labels = chartData.map(d => d.月份);
+      const values = chartData.map(d => d.銷售總額);
+
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '每月銷售總額',
+            data: values,
+            borderColor: '#27ae60',
+            backgroundColor: 'rgba(39, 174, 96, 0.2)',
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#27ae60'
+          }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function exportExcel() {
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(chartData);
+      XLSX.utils.book_append_sheet(wb, ws, "銷售統計");
+      XLSX.writeFile(wb, "sales_summary.xlsx");
+    }
+
+    loadChart();
+  </script>
+</body>
+</html>
